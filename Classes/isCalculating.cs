@@ -9,12 +9,30 @@ public class Calculating
     double result;
     
     public double ProcessInput(string input, double previousResult = 0.0)
-    {
+    { 
+        if (input != null && input.ToLower() == "clear")
+        {
+            return -000.00;
+        }
+        else if (input != null && input.ToLower() == "exit")
+        {
+            return -000.01;
+        }
+        
         string? resultString = previousResult.ToString();
-        input = resultString + input.Trim();
-        string spacedInput = input.Replace("*", " * ").Replace("/", " / ").Replace("+", " + ").Replace("-", " - ");
+        input = resultString + input!.Trim();
+        
+        // Isolate the operations so it can split the string into array
+        string spacedInput = input
+        .Replace("*", " * ")
+        .Replace("/", " / ")
+        .Replace("+", " + ")
+        .Replace("-", " - ");
+
+        
         string[] parts = spacedInput.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         
+        // Check length of array and confirm operator and digits index in array
         if (parts.Length == 3)
         {
             operation = parts[1];
