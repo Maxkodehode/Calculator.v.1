@@ -7,13 +7,12 @@ namespace Calculator
     {
         static void Main(string[] args)
         {
-            // The flag is moved outside the loop to persist its state, 
-            // ensuring the exit command works correctly.
-            bool shouldExit = false; 
+            
+            bool shouldExit = false; // Flag to control outer loop exit
 
             while (true)
             { 
-                // Check if inner loop told us to exit
+                // Check if we should exit the program
                 if (shouldExit) 
                 {
                     Console.WriteLine("Exiting calculator.");
@@ -30,30 +29,43 @@ namespace Calculator
                 AnsiConsole.MarkupLine("[green]---------------------------------------------------------------------------------------[/]");  
                 Console.Write("> ");
                 string? input = Console.ReadLine();
-                Calculating calculate = new Calculating();
+                Calculate calculate = new Calculate();
                 
                 if (input == null)
                 {
-                    AnsiConsole.MarkupLine("[red]No valid input detected[/]");
+                    // This case is largely handled by the -555.55 error code in ProcessInput
+                    AnsiConsole.MarkupLine("[red]No valid input detected[/]"); 
                 }
                 else
                 {
                     result = calculate.ProcessInput(input);
                     
                     // Check special return codes after the first calculation
-                    if (result == -000.01)
+                    if (result == Calculate.CommandExit)
                     {
                         shouldExit = true;
                         continue; // Go to top to trigger exit check
                     }
-                    else if (result == -000.00)
+                    else if (result == Calculate.CommandClear)
                     {
                         AnsiConsole.MarkupLine("[green]Starting new calculation.[/]");
                         continue; // Go to top to restart
                     }
-
-                    AnsiConsole.MarkupLine($"[yellow]{result}[/]");
-                    hasInput = true;
+                    // Handle ALL error codes (any negative return code)
+                    else if (result == Calculate.ErrorDivideByZero ||
+                             result == Calculate.ErrorInvalidOperator ||
+                             result == Calculate.ErrorInvalidExpressionSyntax ||
+                             result == Calculate.ErrorGenericFailure ||
+                             result == Calculate.ErrorInvalidCharacter ||
+                             result == Calculate.ErrorEmptyInput)
+                    {
+                        HandleErrorDisplay(result);
+                    }
+                    else // Valid result
+                    {
+                        AnsiConsole.MarkupLine($"[yellow]{result}[/]");
+                        hasInput = true;
+                    }
                 }
                 
                 // --- Continuation Prompt ---
@@ -77,21 +89,45 @@ namespace Calculator
                         result = calculate.ProcessInput(input, previousResult);
                         
                         // Check special return codes inside the inner loop
-                        if (result == -000.01)
+                        if (result == Calculate.CommandExit)
                         {
                             shouldExit = true;
                             break; // Breaks inner loop, returns to outer loop check
                         }
-                        else if (result == -000.00)
+                        else if (result == Calculate.CommandClear)
                         {
                             AnsiConsole.MarkupLine("[blue]Starting new calculation.[/]");
                             break; // Breaks inner loop, outer loop restarts
                         }
-                        
+                        // Handle ALL error codes
+                        else if (result < 0)
+                        {
+                            HandleErrorDisplay(result);
+                            hasInput = false; // Stop continuation loop on error
+                            break;
+                        }
+
                         AnsiConsole.MarkupLine($"[yellow]{result}[/]");
                     }
                 }
             }
+        }
+        
+        // Helper function to display meaningful error messages based on the constant
+        static void HandleErrorDisplay(double errorCode)
+        {
+             // Use a switch expression for cleaner error mapping
+             string message = errorCode switch
+             {
+                Calculate.ErrorDivideByZero => "Error: Cannot divide by zero.",
+                Calculate.ErrorInvalidOperator => "Error: Invalid or unsupported operator.",
+                Calculate.ErrorInvalidExpressionSyntax => "Error: Invalid expression format, missing operands, or incomplete operation.",
+                Calculate.ErrorGenericFailure => "Error: An unknown processing error occurred.",
+                Calculate.ErrorInvalidCharacter => "Error: Input contains an invalid character (must be a digit, '.', or an operator).",
+                Calculate.ErrorEmptyInput => "Error: No valid input was provided.",
+                _ => "Error: Unrecognized error code."
+             };
+             AnsiConsole.MarkupLine($"[red]{message} (Code: {errorCode})[/]");
         }
     }
 }
