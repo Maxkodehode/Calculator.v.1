@@ -63,15 +63,16 @@ namespace Calculator
                     }
                     else // Valid result
                     {
-                        AnsiConsole.MarkupLine($"[yellow]{result}[/]");
+                        
                         hasInput = true;
                     }
                 }
                 
                 // --- Continuation Prompt ---
-                AnsiConsole.MarkupLine("[green]To continue calculating, you only need to input the operation followed by the value.\nExample: If the previous result was 5, typing +10 will calculate 5+10.[/]");
+                AnsiConsole.MarkupLine("[green]To continue calculating, you only need to input the operation followed by the value.[/]");
                 AnsiConsole.MarkupLine("[green]Example: If the previous result was 5, typing +10 will calculate 5+10.[/]");
                 AnsiConsole.MarkupLine("[green]---------------------------------------------------------------------------------------[/]");  
+                AnsiConsole.MarkupLine($"[yellow]{result}[/]");
   
                 // --- Continuation Loop ---
                 while (hasInput)
@@ -86,6 +87,7 @@ namespace Calculator
                     else
                     {
                         double previousResult = result;
+                        
                         result = calculate.ProcessInput(input, previousResult);
                         
                         // Check special return codes inside the inner loop
@@ -106,14 +108,14 @@ namespace Calculator
                             hasInput = false; // Stop continuation loop on error
                             break;
                         }
-
+                        
                         AnsiConsole.MarkupLine($"[yellow]{result}[/]");
                     }
                 }
             }
         }
         
-        // Helper function to display meaningful error messages based on the constant
+        
         static void HandleErrorDisplay(double errorCode)
         {
              // Use a switch expression for cleaner error mapping
